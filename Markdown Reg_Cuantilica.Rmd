@@ -1,0 +1,725 @@
+---
+title: "Gestión y Evaluación del Riesgo de Liquidez en Seguros de Crédito: Un Análisis Intercuantil"
+author: "Garduño Gonzalez Roberto, Vazquez Alfaro Johan."
+output: pdf_document
+date: "2025-06-30"
+---
+
+# Resumen
+
+La gestión del riesgo de liquidez es un aspecto crucial en la estabilidad de las aseguradoras de crédito, especialmente bajo marcos regulatorios como Solvencia II, que exigen un monitoreo más preciso de los riesgos financieros. La siniestralidad elevada puede afectar significativamente la liquidez, comprometiendo la capacidad de pago y el cumplimiento de requerimientos regulatorios. Este estudio emplea regresión cuantílica para evaluar este impacto, ya que permite analizar el efecto de la siniestralidad en distintos niveles de la distribución de liquidez, proporcionando una visión más detallada que los modelos tradicionales de regresión. Además, se incorporan técnicas de segmentación de riesgo como PCA y K-means para mejorar la caracterización del problema.
+
+*Palabras clave: riesgo de liquidez, siniestralidad, aseguradoras de crédito, Solvencia II, regresión cuantílica, PCA, K-means.*
+
+# Abstract
+
+Liquidity risk management is a critical factor in the stability of credit insurers, particularly under regulatory frameworks such as Solvency II, which demand precise financial risk monitoring. High claims frequency can severely impact liquidity, affecting payment capacity and regulatory compliance. This study applies quantile regression to assess this impact, as it allows for analyzing the effect of claims frequency across different points of the liquidity distribution, providing a more detailed perspective than traditional regression models. Additionally, risk segmentation techniques such as PCA and K-means are incorporated to enhance problem characterization.
+
+*Keywords: liquidity risk, claims frequency, credit insurers, Solvency II, quantile regression, PCA, K-means.*
+
+
+# Introducción
+
+El seguro de crédito es un pilar fundamental para la estabilidad del sistema financiero, al permitir a las empresas reducir el riesgo de impago y mejorar su acceso a crédito. Este tipo de seguro proporciona un resguardo frente a la morosidad, impulsando la actividad económica. No obstante, las aseguradoras que ofrecen estos productos se enfrentan a desafíos significativos en la gestión del riesgo de liquidez, especialmente cuando se producen eventos de alta siniestralidad o crisis económicas que aumentan de manera inesperada las reclamaciones. Este tipo de riesgo se refiere a la capacidad de la aseguradora para disponer de recursos suficientes para cumplir con sus obligaciones frente a los siniestros, sin comprometer su estabilidad financiera. Una mala gestión de este riesgo puede poner en peligro la solvencia de las aseguradoras y tener repercusiones negativas en el mercado financiero.
+
+La correcta gestión del riesgo de liquidez es crucial para la sostenibilidad a largo plazo de las aseguradoras de crédito, ya que una falta de liquidez podría desencadenar problemas operativos y, en el peor de los casos, comprometer la confianza en el sector. En este contexto, la investigación del impacto de la siniestralidad sobre la liquidez se presenta como un área clave para entender cómo las aseguradoras pueden mitigar riesgos y tomar decisiones más informadas.
+
+Este estudio tiene como objetivo evaluar el impacto de la siniestralidad en el riesgo de liquidez de las aseguradoras de crédito, mediante el uso de regresión cuantílica. Esta técnica permite modelar la relación entre la siniestralidad y el riesgo de liquidez en diferentes niveles de la distribución, considerando el comportamiento extremo de los datos. La variable dependiente en el modelo es un ratio de liquidez, que captura la capacidad de la aseguradora para cumplir con sus obligaciones financieras ante la ocurrencia de siniestros. Además, se utilizarán técnicas de segmentación como K-means para clasificar a los asegurados según su perfil de riesgo, mejorando la segmentación del riesgo y su relación con la liquidez de la aseguradora.
+
+El documento está organizado de la siguiente manera: en primer lugar, se presentan los objetivos del estudio y el contexto en el que se plantea la investigación. A continuación, se realiza una revisión de la literatura, en la que se abordan los conceptos clave sobre el riesgo de liquidez, los seguros de crédito y las metodologías previas en la evaluación del riesgo de liquidez. En la sección de análisis de datos, se describe cómo se exploran las bases de datos y se identifican patrones relevantes. La metodología se enfoca en la regresión cuantílica, detallando las herramientas estadísticas utilizadas, y en la sección de resultados, se presentan los hallazgos obtenidos y su interpretación. Finalmente, las conclusiones resaltan los puntos más importantes de la investigación y proporcionan recomendaciones para mejorar la gestión del riesgo de liquidez en las aseguradoras de crédito.
+
+Este estudio tiene como objetivo ofrecer herramientas analíticas avanzadas que fortalezcan la evaluación del riesgo de liquidez y apoyen la toma de decisiones estratégicas dentro de la industria aseguradora.
+
+# Objetivos
+
+## Objetivo general
+
+Evaluar el impacto de la siniestralidad en el riesgo de liquidez de las aseguradoras de crédito mediante regresión cuantílica, utilizando bases de datos de emisiones de pólizas y siniestros, e integrando técnicas de análisis de datos para mejorar la segmentación y comprensión de los factores de riesgo.
+
+## Objetivos específicos
+
+1.  Explorar y caracterizar las bases de datos de emisiones de pólizas y siniestros para identificar patrones relevantes en la siniestralidad y su relación con la liquidez.
+
+2.  Aplicar técnicas de conglomerados para segmentar grupos de asegurados según su perfil de riesgo.
+
+3.  Desarrollar modelos de regresión cuantílica que permitan estimar el impacto de distintos niveles de siniestralidad en la liquidez de las aseguradoras.
+
+
+## Revisión de literatura.
+
+El riesgo de liquidez en los seguros de crédito es un factor crucial que afecta la estabilidad financiera de las aseguradoras. En este contexto, diversas técnicas de análisis de datos como el agrupamiento mediante K-Means y la Regresión Cuantilica han demostrado ser herramientas efectivas para evaluar y mitigar dicho riesgo. Esta revisión de literatura explora estudios relevantes que han aplicado estas metodologías en el sector financiero y asegurador.
+
+**Regresión Cuantilica en la Cuantificación del Riesgo**
+
+Según Koenker y Bassett (1978), la regresión cuantilica es una técnica estadística que permite modelar la relación entre variables en distintos puntos de la distribución condicional de la variable dependiente. Su aplicación en seguros de crédito resulta útil para evaluar eventos extremos de iliquidez, dado que proporciona una mejor estimación de la dispersión de los riesgos financieros (Koenker, 2005).
+
+Un estudio realizado por Martins y Silva (2020) aplicó la regresión cuantilica para analizar la distribución del riesgo en mercados de seguros, encontrando que los percentiles superiores de la distribución presentan mayor sensibilidad a cambios en variables macroeconómicas. Esto es relevante en seguros de crédito, donde se pueden evaluar diferentes escenarios de riesgo a partir de cuantiles específicos de la distribución de pérdidas.
+
+Engle y Manganelli (2004) introdujeron modelos de regresión cuantilica dinámicos para estimar el VaR, los cuales han sido utilizados ampliamente en mercados financieros. En un estudio aplicado a datos financieros colombianos, Rodríguez et al. (2018) demostraron que estos modelos permiten capturar patrones no lineales sin imponer supuestos de distribución específicos. Su implementación en seguros de crédito facilitaría la identificación de periodos de alta volatilidad en la liquidez y la predicción de episodios críticos.
+
+**Aplicación de K-Means en la segmentación de clientes y evaluación de riesgos**
+
+El algoritmo K-Means es una de las técnicas de clustering más utilizadas para la segmentación de clientes en el sector financiero. MacQueen (1967) lo introdujo como un método para agrupar datos en base a sus similitudes, lo que permite identificar perfiles de riesgo diferenciados.
+
+En un estudio realizado por López y Ramírez (2019), se implementó K-Means para agrupar clientes bancarios según su comportamiento crediticio, lo que facilitó la toma de decisiones estratégicas en la gestión de riesgo. En el contexto de seguros de crédito, esta metodología podría emplearse para segmentar asegurados con base en su perfil de liquidez, permitiendo a las aseguradoras diseñar estrategias personalizadas para cada grupo identificado.
+
+Otro estudio relevante de Zhang et al. (2020) utilizó K-Means para analizar riesgos en portafolios de inversión, demostrando que la segmentación basada en características financieras mejora la predicción del riesgo. En seguros de crédito, esta técnica permitiría la identificación de patrones de comportamiento entre asegurados, lo que facilitaría la aplicación de medidas preventivas para mitigar la exposición al riesgo de liquidez.
+
+A manera de conclusión, podemos decir que los estudios analizados evidencian que K-Means y la Regresión Cuantilica son herramientas valiosas para evaluar y gestionar el riesgo financiero en distintos contextos. Su aplicación en seguros de crédito podría proporcionar un marco robusto para identificar, modelar y mitigar el riesgo de liquidez de manera efectiva. Futuras investigaciones podrían centrarse en la combinación de estas técnicas para optimizar la predicción y prevención de crisis de liquidez en aseguradoras.
+
+# Análisis Exploratorio de Datos (EDA)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(dplyr, ggplot2, tidyverse, GGally, car, quantreg, factoextra, clustMixType, cluster, knitr, corrplot, psych, plotly, NbClust, fpc)
+
+```
+
+```{r , include=FALSE}
+setwd("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN")
+emisiones = read.csv("CE_FINAL_FINAL.csv", fileEncoding = "UTF-8")
+CSiniestros = read.csv("SiniestrosF.csv")
+emisiones$GIRO = iconv(emisiones$GIRO, from = "UTF-8", to = "ASCII//TRANSLIT")
+emisiones$PRIMA_DEVENGADA[sapply(emisiones$PRIMA_DEVENGADA, is.null)] <- 0
+emisiones$PRIMA_DEVENGADA <- as.numeric(emisiones$PRIMA_DEVENGADA)
+emisiones$PRIMA_DEVENGADA[is.na(emisiones$PRIMA_DEVENGADA)] <- 0
+```
+
+## Exploración de datos sobre emisiones
+
+La [**base de datos**](https://www.cnsf.gob.mx/Transparencia/Paginas/DatosAbiertos.aspx) referente a las emisiones de pólizas de seguros de crédito está compuesta por 15 variables y 21,394 observaciones. Las variables que integran esta base de datos se describen a continuación junto con un ejemplo de la primeras observaciones.
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+glimpse(emisiones)
+```
+
+Para llevar a cabo un análisis más profundo, se examinan las variables dividiéndolas en continuas y categóricas. A continuación, se presenta la información estadística relevante para las variables continuas.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+options(scipen = 999)
+med_ten <- data.frame(
+  Variable = c("PLAZO", "NUMERO_POLIZAS","PRIMA_EMITIDA", "PRIMA_RETENIDA", "PRIMA_DEVENGADA", "SUMA_ASEGURADA", "COMISION_DIRECTA"),
+  Media  = c(mean(emisiones$PLAZO), mean(emisiones$NUMERO_POLIZAS), mean(emisiones$PRIMA_EMITIDA) ,mean(emisiones$PRIMA_RETENIDA),mean(emisiones$PRIMA_DEVENGADA), mean(emisiones$SUMA_ASEGURADA), mean(emisiones$COMISION_DIRECTA)), 
+  Mediana = c(median(emisiones$PLAZO), median(emisiones$NUMERO_POLIZAS), median(emisiones$PRIMA_EMITIDA), median(emisiones$PRIMA_RETENIDA),median(emisiones$PRIMA_DEVENGADA), median(emisiones$SUMA_ASEGURADA), median(emisiones$COMISION_DIRECTA)),
+  Dev.Est = c(sd(emisiones$PLAZO), sd(emisiones$NUMERO_POLIZAS), sd(emisiones$PRIMA_EMITIDA),sd(emisiones$PRIMA_RETENIDA), sd(emisiones$PRIMA_DEVENGADA), sd(emisiones$SUMA_ASEGURADA), sd(emisiones$COMISION_DIRECTA)),
+  Rango_Inter = c(IQR(emisiones$PLAZO), IQR(emisiones$NUMERO_POLIZAS), IQR(emisiones$PRIMA_EMITIDA),IQR(emisiones$PRIMA_RETENIDA), IQR(emisiones$PRIMA_DEVENGADA), IQR(emisiones$SUMA_ASEGURADA), IQR(emisiones$COMISION_DIRECTA))
+)
+
+med_ten <- med_ten %>% mutate_at(vars(Media, Mediana, Dev.Est), ~ round(., 1))
+
+med_ten <- format(med_ten, big.mark = ",")
+
+knitr::kable(med_ten, align = rep("c", ncol(med_ten)))
+
+```
+
+Además, se presenta un analisis de correlación entre variables, el cual posteriormente sera usado para el Análisis de Componentes principales. 
+
+```{r, warning=FALSE, fig.align='center', echo=FALSE, message=FALSE}
+
+# Calcular la matriz de correlación
+cor_matrix <- cor(emisiones[,c("PLAZO", "NUMERO_POLIZAS","PRIMA_EMITIDA", "PRIMA_RETENIDA", "PRIMA_DEVENGADA", "SUMA_ASEGURADA", "COMISION_DIRECTA")], use = "pairwise.complete.obs")
+
+# Graficar el correlograma
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.cex = 0.5,  # Aumenta el tamaño de las etiquetas
+         tl.col = "black", 
+         tl.srt = 35,  # Rota las etiquetas 45 grados
+         number.cex = 0.7)  # Ajusta tamaño de los números
+
+
+```
+
+
+
+Respecto a las variables categoricas, se muestran los histogramas correspondientes a las variables más destacadas. En primer instancia se encuentra el número de emisiones por giro, tomando en consideración que son más de 200 giros y por ende, únicamente se muestran los cinco con mayor cantidad de emisiones.
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6.5}
+library(dplyr)
+library(ggplot2)
+
+
+
+emisiones %>%
+  count(GIRO, sort = TRUE) %>%   # Contamos las observaciones por categoría y las ordenamos
+  top_n(5, n) %>%               # Seleccionamos las 20 categorías con más registros
+ggplot(aes(x = reorder(GIRO, n), y = n)) + 
+  geom_bar(stat = "identity", fill = "#528B8B") +  # Especifica el color aquí
+  coord_flip() +  # Rotamos el gráfico para mejor visualización
+  labs(x = "Giro", y = "Frecuencia", title = "Giros con más emisiones") + 
+  theme(
+    plot.title = element_text(size=11), 
+    axis.title = element_text(size=9),  
+    axis.text = element_text(size=9),
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid = element_blank()
+  )
+```
+
+Para el caso de las emisiones por año se muestran todos los años de los cuales se tiene información al respecto.
+
+```{r, fig.align='center', warning=FALSE, message=FALSE, echo=FALSE, fig.height= 2.5, fig.width= 6.5}
+library(dplyr)
+library(ggplot2)
+emisiones$ANO <- as.factor(emisiones$ANO)
+
+ggplot(data = emisiones, aes(x = ANO)) + 
+  geom_bar(fill = "#528B8B") +  # Especifica el color aquí
+  coord_flip() +  # Rotamos el gráfico para mejor visualización
+  labs(x = "Año", y = "Frecuencia", title = "Frecuencia de emisiones por año", ) + 
+  theme_minimal()+
+  theme(
+    plot.title = element_text(size=11), 
+    axis.title = element_text(size=9),  
+    axis.text = element_text(size=9),
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid = element_blank()
+  )
+
+```
+
+
+# Exploración de datos sobre siniestros
+
+Por su parte, la [**base de datos**](https://www.cnsf.gob.mx/Transparencia/Paginas/DatosAbiertos.aspx) referente a los siniestros de crédito está conformada por 19 variables y 4755 observaciones. De igual manera, podremos observar las variables que la componen junto con su ejemplificación:
+
+```{r, echo=FALSE}
+CSiniestros$RECUPERACION.REASEGURO[is.na(CSiniestros$RECUPERACION.REASEGURO)] <- 0
+CSiniestros$MONTO.DE.RECUPERACION[is.na(CSiniestros$MONTO.DE.RECUPERACION)] <- 0
+CSiniestros <- CSiniestros[CSiniestros$MONTO.DEL.SINIESTRO != 0, ]
+
+
+library(dplyr)
+glimpse(CSiniestros)
+```
+Las variables no categóricas de mayor importancia se ven reflejadas en la siguiente tabla, en dónde podemos observar sus datos estadísticos:
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 8}
+
+CSiniestros$RECUPERACION.REASEGURO[is.na(CSiniestros$RECUPERACION.REASEGURO)] <- 0
+CSiniestros$MONTO.DE.RECUPERACION[is.na(CSiniestros$MONTO.DE.RECUPERACION)] <- 0
+library(dplyr)
+library(knitr)
+options(scipen = 999)
+
+# Crear la tabla con nombres corregidos
+datos <- data.frame(
+  Monto = c("SINIESTRO", "PAGADO", "DEDUCIBLE", "COASEGUROS", "M.RECUPER", "R.REASEGURO"),
+  Media = c(mean(CSiniestros$MONTO.DEL.SINIESTRO), mean(CSiniestros$MONTO.PAGADO), mean(CSiniestros$MONTO.DE.DEDUCIBLE), 
+            mean(CSiniestros$MONTO.COASEGUROS), mean(CSiniestros$MONTO.DE.RECUPERACION), mean(CSiniestros$RECUPERACION.REASEGURO)),
+  Varianza = c(var(CSiniestros$MONTO.DEL.SINIESTRO), var(CSiniestros$MONTO.PAGADO), var(CSiniestros$MONTO.DE.DEDUCIBLE), 
+               var(CSiniestros$MONTO.COASEGUROS), var(CSiniestros$MONTO.DE.RECUPERACION), var(CSiniestros$RECUPERACION.REASEGURO)),
+  Maximo = c(max(CSiniestros$MONTO.DEL.SINIESTRO), max(CSiniestros$MONTO.PAGADO), max(CSiniestros$MONTO.DE.DEDUCIBLE), 
+             max(CSiniestros$MONTO.COASEGUROS), max(CSiniestros$MONTO.DE.RECUPERACION), max(CSiniestros$RECUPERACION.REASEGURO)),
+  Desv.Est = c(sd(CSiniestros$MONTO.DEL.SINIESTRO), sd(CSiniestros$MONTO.PAGADO), sd(CSiniestros$MONTO.DE.DEDUCIBLE), 
+               sd(CSiniestros$MONTO.COASEGUROS), sd(CSiniestros$MONTO.DE.RECUPERACION), sd(CSiniestros$RECUPERACION.REASEGURO))
+)
+
+# Redondear valores numéricos
+datos <- datos %>% mutate_at(vars(Media, Varianza, Maximo, Desv.Est), ~ round(., 1))
+
+# Aplicar formato de miles
+datos <- format(datos, big.mark = ",")
+
+# Mostrar tabla con knitr
+knitr::kable(datos, align = rep("c", ncol(datos)))
+
+
+```
+
+A continuación se puede ver el mapa de correlacion de la base de siniestros, de igual manera utilizada en el Análisis de Componentes Pricipales:
+
+```{r, warning=FALSE, fig.align='center', echo=FALSE, message=FALSE}
+library(corrplot)
+
+# Calcular la matriz de correlación
+cor_matrix <- cor(CSiniestros[,c("PLAZO..dias.", "NUMERO.DE.SINIESTROS", "MONTO.DEL.SINIESTRO", "MONTO.PAGADO", "MONTO.DE.DEDUCIBLE", "MONTO.COASEGUROS", "GASTOS.DE.AJUSTE", "SALVAMENTOS", "MONTO.DE.RECUPERACION", "RECUPERACION.REASEGURO")], use = "pairwise.complete.obs")
+
+# Graficar el correlograma
+corrplot(cor_matrix, method = "color", type = "upper", 
+         tl.cex = 0.5,  # Aumenta el tamaño de las etiquetas
+         tl.col = "black", 
+         tl.srt = 35,  # Rota las etiquetas 45 grados
+         number.cex = 0.7)  # Ajusta tamaño de los números
+
+
+```
+
+Realizando una análisis a profundidad de la base de datos, a continuación se podran visualizar la tabla del promedio de los montos de siniestros en comaparacion con el promedio del monto pagado por la aseguradora de acuerdo a el numero de siniestros:
+
+```{r, fig.align='center', warning=FALSE, message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+library(tidyr)
+library(ggplot2)
+library(scales)
+promedios <- CSiniestros %>%
+  group_by(NUMERO.DE.SINIESTROS) %>%
+  summarise(
+    Promedio_Monto_Siniestro = mean(MONTO.DEL.SINIESTRO, na.rm = TRUE),
+    Promedio_Monto_Pagado = mean(MONTO.PAGADO, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = c(Promedio_Monto_Siniestro, Promedio_Monto_Pagado), 
+               names_to = "Tipo", values_to = "Monto")
+
+
+ggplot(promedios, aes(x = NUMERO.DE.SINIESTROS, y = Monto, color = Tipo)) +
+  geom_line(size = 1) + 
+  geom_point(size = 2) + 
+  scale_color_manual(values = c("darkblue", "gray"), 
+                     labels = c("Monto del Siniestro", "Monto Pagado")) + 
+  labs(title = "Promedio del Monto del Siniestro y Monto Pagado por Número de Siniestros",
+       x = "Número de Siniestros",
+       y = "Monto Promedio del Siniestro",
+       color = "Tipo de Monto") +
+  scale_y_continuous(labels = label_number(scale = 1e-6, suffix = " mill")) +  # Formato en millones
+  theme(
+        axis.title.x = element_text(face = "bold"), 
+        axis.title.y = element_text(face = "bold"),
+        axis.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "white", color = NA),
+        panel.grid = element_blank()
+  )
+
+
+```
+
+De igual manera, en la siguiente gráfica podemos observar cual es el monto promedio de deducible de acuerdo al numero de siniestros:
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+
+promedio_deducible <- CSiniestros %>%
+  group_by(NUMERO.DE.SINIESTROS) %>%
+  summarise(Promedio_Deducible = mean(MONTO.DE.DEDUCIBLE, na.rm = TRUE))
+
+ggplot(promedio_deducible, aes(x = as.factor(NUMERO.DE.SINIESTROS), y = Promedio_Deducible)) +
+  geom_col(fill = "#528B8B") +  
+  labs(title = "Promedio del Monto de Deducible por Número de Siniestros",
+       x = "Número de Siniestros",
+       y = "Monto Promedio de Deducible") +
+  theme(
+    axis.title.x = element_text(face = "bold"), 
+        axis.title.y = element_text(face = "bold"),
+        axis.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "white", color = NA),
+        panel.grid = element_blank()
+  )
+
+```
+
+Es importante visualizar el monto promedio de los coaseguros, debido a sumas aseguradas altas y riesgos extremos; esto orilla a las aseguradoras a entrar en coaseguro con alguna otra entidad; el siguiente gráfico nos muestra como se comporta el promedio del coaseguro de acuerdo al numero de siniestros:
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+
+promedio_coaseguro <- CSiniestros %>%
+  group_by(NUMERO.DE.SINIESTROS) %>%
+  summarise(Promedio_Coaseguro = mean(MONTO.COASEGUROS, na.rm = TRUE))
+
+ggplot(promedio_coaseguro, aes(x = as.factor(NUMERO.DE.SINIESTROS), y = Promedio_Coaseguro)) +
+  geom_col(fill = "#528B8B") +  
+  labs(title = "Promedio del Monto de Coaseguro por Número de Siniestros",
+       x = "Número de Siniestros",
+       y = "Monto Promedio de Coaseguro") +
+  theme(
+    axis.title.x = element_text(face = "bold"), 
+        axis.title.y = element_text(face = "bold"),
+        axis.title = element_text(face = "bold"),
+        panel.background = element_rect(fill = "white", color = NA),
+        panel.grid = element_blank()
+  )
+
+
+```
+
+
+
+
+
+# Metodología
+
+El presente trabajo utiliza técnicas de análisis estadístico y aprendizaje no supervisado para segmentar la información contenida en dos bases de datos: una base de emisiones y otra de siniestros. El objetivo central es generar conglomerados homogéneos mediante el algoritmo K-prototypes, con el fin de aplicar regresiones cuantilicas adaptadas a cada segmento y así mejorar la precisión del modelo explicativo de los ratios construidos.
+
+**Construcción de ratios**
+
+A partir de la base de emisiones, se calcula el siguiente indicador:
+
+- Ratio de devengamiento:
+$$
+{Ratio}_{emisión} =  \frac{Prima_{devengada}}{Prima_{emitida}}
+$$
+
+De forma análoga, sobre la base de siniestros se calcula un segundo ratio, relacionado con la eficiencia o carga de siniestralidad. Por ejemplo:
+
+- Ratio de siniestralidad:
+$$
+{Ratio}_{siniestralidad} =  \frac{Monto_{siniestro}}{Monto_{pagado}}
+$$
+
+Ambos indicadores sirven como variables dependientes en los modelos posteriores.
+
+**Segmentación con algoritmos de clustering: de K-means a K-prototypes**
+
+Para generar agrupaciones o conglomerados de observaciones similares, se emplea un algoritmo de clasificación no supervisado. En un principio, podría considerarse el algoritmo K-means, el cual agrupa observaciones numéricas en función de la minimización de la distancia euclidiana al centroide de cada grupo. Sin embargo, este algoritmo presenta limitaciones cuando se trabaja con bases que contienen variables tanto numéricas como categóricas.
+
+Para superar esta limitación, se utiliza el algoritmo K-prototypes, una extensión del K-means que permite la inclusión simultánea de variables de distintos tipos. Este algoritmo calcula la distancia combinando la distancia euclidiana (para las variables numéricas) y la disimilitud simple (para las categóricas), ajustando un parámetro de ponderación que equilibra ambas.
+
+**Modelado mediante regresión cuantilica por conglomerado**
+
+Una vez definidas las agrupaciones, se procede a modelar cada ratio de forma diferenciada según el clúster al que pertenece cada observación. Se utiliza la regresión cuantilica, técnica que permite estimar la relación entre una variable dependiente y una serie de variables explicativas para distintos puntos de la distribución (cuantiles), no solo la media.
+
+Esto es especialmente útil en contextos como los seguros, donde los extremos (por ejemplo, ratios muy altos o muy bajos) pueden ser más relevantes que el valor promedio.
+
+Para cada clúster k, se estima el siguiente modelo:
+$$
+Q_{Y|\mathbf{X}}^{(\tau)} = \beta_0^{(k, \tau)} + \beta_1^{(k, \tau)}X_1 + \beta_2^{(k, \tau)}X_2 + \dots + \beta_p^{(k, \tau)}X_p
+$$
+
+Este procedimiento se repite para cada conglomerado, generando modelos adaptados a las particularidades de cada grupo.
+
+**Evaluación de resultados**
+
+Finalmente, se evalúan los modelos mediante:
+
+- Error absoluto medio (MAE) por cuantil y conglomerado.
+
+- Comparación gráfica de valores reales vs predichos.
+
+- Validación cruzada para verificar la robustez del enfoque.
+
+Este enfoque permite no solo mejorar la precisión predictiva, sino también capturar la heterogeneidad presente en los datos que sería ignorada con un modelo único para toda la muestra.
+
+# Propuesta de modelo
+
+**Descripción del modelo propuesto **
+
+El modelo propuesto combina dos enfoques complementarios. En primera instancia, se realiza una segmentación de los datos mediante el algoritmo K-prototypes, con el objetivo de identificar conglomerados homogéneos dentro de la población observada. Posteriormente, se estiman modelos de regresión cuantilica de forma independiente para cada uno de los conglomerados, con el fin de capturar el comportamiento diferencial de los ratios bajo estudio en distintos puntos de su distribución condicional.
+
+**Justificación de la elección del modelo**
+
+La elección del enfoque combinado responde a dos motivaciones principales:
+
+- Heterogeneidad de los datos: La estructura de las bases analizadas contiene observaciones con características muy diversas, tanto en términos geográficos como financieros. La segmentación previa permite generar modelos específicos para grupos más homogéneos, reduciendo la varianza interna y mejorando la capacidad explicativa del modelo.
+
+- Naturaleza no gaussiana del ratio objetivo: El ratio de devengamiento, así como el de siniestralidad, puede presentar asimetrías, colas pesadas o comportamiento no lineal. La regresión cuantilica permite modelar distintos puntos de la distribución condicional, captando así efectos heterogéneos que no son visibles a través de modelos tradicionales de regresión lineal.
+
+Adicionalmente, la regresión cuantilica es robusta frente a outliers y no requiere asumir normalidad de los errores, lo cual resulta particularmente valioso en análisis actuariales y de seguros.
+
+**Supuestos del modelo**
+
+Aunque la regresión cuantilica es un modelo menos restrictivo que la regresión lineal tradicional, su aplicación asume ciertos puntos clave:
+
+- Independencia de las observaciones dentro de cada conglomerado.
+
+- Correcta especificación de las variables explicativas: es decir, que las variables seleccionadas efectivamente capturen la relación con el cuantil del ratio.
+
+- Continuidad condicional del cuantil respecto a las covariables: el modelo asume que para cada cuantil $\tau$, la función de regresión es continua en las covariables.
+
+En cuanto al proceso de K-prototypes, se asume que:
+
+- Las variables seleccionadas para la segmentación permiten definir grupos coherentes y relevantes para el análisis.
+
+- El número de conglomerados es adecuado y se determina empíricamente mediante criterios de calidad de clustering como el índice de silueta o el método del codo.
+
+**Parámetros del modelo y su estimación**
+
+El modelo de clustering K-prototypes requiere los siguientes parámetros:
+
+- Número de clústeres (K): se determina empíricamente mediante prueba de distintos valores de K y análisis del comportamiento del costo total, índice de silueta, o la técnica del codo.
+
+Parámetro de ponderación ($\lambda$): controla la influencia relativa de las variables categóricas y numéricas. Este valor puede fijarse manualmente o dejarse en su valor predeterminado.
+
+La estimación se realiza mediante minimización iterativa de la función de costo total, que combina la distancia euclidiana para variables numéricas y disimilitud simple para variables categóricas.
+
+La estimación de la regresión cuantilica se basa en la minimización de la función de pérdida asimétrica, definida como:
+
+
+$$\rho_{\tau}(u) = u \cdot (\tau - \mathbb{I}(u < 0))$$
+
+**Pruebas estadísticas para validación**
+
+Para evaluar la calidad de los modelos estimados, se consideran las siguientes pruebas y métricas:
+
+- Error absoluto medio (MAE) para cada cuantil y conglomerado.
+
+- Comparación de valores observados vs predichos mediante gráficos.
+
+# Resultados.
+
+Respecto a la base de emisiones se realiza en primera instancia el K-prototype. 
+Para poder conocer el número de clusters se realiza el gráfico de codo y el ratio de la silueta. En primera instancia el gráfico del codo es el siguiente:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, include = FALSE}
+em <- read.csv("CE_FINAL_FINAL.csv")
+
+# Se omiten valores de prima emitidas negativos y se calcula el ratio 
+#install.packages("dplyr")
+library(dplyr)
+em$PRIMA_DEVENGADA <- as.numeric(em$PRIMA_DEVENGADA)
+em <- em %>% filter(PRIMA_EMITIDA >0, !is.na(PRIMA_DEVENGADA)) 
+em <- em %>% mutate(ratio = PRIMA_DEVENGADA/PRIMA_EMITIDA)
+
+# Instalación de mas paqueterias
+pkgs <- c("factoextra", "NbClust", "cluster", "fpc", "dendextend")
+#install.packages(pkgs)
+
+library(factoextra); library(NbClust); library(fpc); library(cluster)
+
+## Arreglo sobre la variable País
+#install.packages("stringi")
+library(stringi)
+em$PAIS <- stri_trans_general(em$PAIS, "Latin-ASCII")
+em$PAIS <- as.factor(em$PAIS)
+levels(em$PAIS)
+em <- em %>% mutate(PAIS = case_when(
+  PAIS == "Corea Del Sur" ~ "Corea del Sur",
+  PAIS == "Emiratos Arabes Unidos" ~ "Emiratos Arabes Unido",
+  PAIS == "E.U.A." ~ "EUA",
+  PAIS == "Estados Unidos de America" ~ "EUA", 
+  PAIS == "Pais No Especificado" ~ "Pais no Especificado",
+  TRUE ~ PAIS
+))
+em$PAIS <- as.factor(em$PAIS)
+levels(em$PAIS)
+# Extracción de variables para cluster (País y Suma Asegurada)
+str(em)
+emnum <- em %>% select(PAIS, SUMA_ASEGURADA)
+
+# Estandarización de Suma Asegurada
+emnum$SUMA_ASEGURADA <- as.numeric(scale(emnum$SUMA_ASEGURADA))
+
+#### Aplicación de Prueba del Codo
+options(scipen = 999)
+
+#install.packages("clustMixType")
+library(clustMixType)
+
+costos <- numeric()
+set.seed(1234)
+for (k in 1:10) {
+  modelo <- kproto(emnum[, c("PAIS", "SUMA_ASEGURADA")], k)
+  costos[k] <- modelo$tot.withinss
+}
+
+elbow_data <- data.frame(k = 1:10, costo = costos)
+```
+```{r, echo=FALSE, warning=FALSE, message=FALSE, , fig.height= 2.5, fig.width= 6.5}
+ggplot(elbow_data, aes(x = k, y = costo)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(color = "darkred", size = 2) +
+  labs(title = "Prueba del Codo para K-Prototypes",
+       x = "Número de Clusters (k)",
+       y = "Costo Total") +
+  scale_x_continuous(breaks = seq(min(elbow_data$k), max(elbow_data$k), by = 1)) +
+  theme_minimal()
+```
+
+
+De acuerdo con lo obtenido lo más ideal es tener 3 clusters, a continuación se presenta el gráfico del conglomerado. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE, fig.height= 2.5, fig.width= 6.5}
+set.seed(123)
+resultado <- kproto(emnum[, c("PAIS", "SUMA_ASEGURADA")], k = 3)
+emnum$cluster <- resultado$cluster
+em$cluster <- resultado$cluster
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height= 2.5, fig.width= 6.5}
+ggplot(emnum, aes(x = SUMA_ASEGURADA, y = PAIS, color = factor(cluster))) +
+  geom_jitter(width = 0.5, alpha = 0.7) +
+  labs(title = "Clustering por K-Prototypes",
+       color = "Cluster") +
+  theme_minimal()
+```
+
+Además se presenta un boxplot sobre suma asegurada con respecto a cada cluster. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.height= 2.5, fig.width= 6.5}
+ggplot(em, aes(x = factor(cluster), y = SUMA_ASEGURADA)) +
+  geom_boxplot()
+```
+
+Respecto a la base de siniestros, de igual manera se consideró el método del codo para poder determinar el número óptimo de clusters (k); el no determinar el número óptimo "K" puede llevar a crear clusters aritificiales, es decir, puede forzarse a crear diferencias entre los grupos donde no las hay; además de que puede perder interpretabilidad o llevar a conclusiones erroneas.
+
+El gráfico siguiente nos muestra el número determinado de "K" para la base de siniestros:
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+CSiniestros <- CSiniestros[CSiniestros$MONTO.DEL.SINIESTRO != 0, ]
+options(scipens = 999)
+
+CSiniestros <- CSiniestros %>% 
+  mutate(ID = row_number())
+
+clusterdb <- CSiniestros %>%
+  select(ID, MONTO.PAGADO, PAIS) %>%
+  mutate(across(where(is.character), as.factor))
+
+clusterdb$PAIS <- as.factor(clusterdb$PAIS)
+
+cost <- numeric()
+set.seed(123)
+
+for (k in 1:10) {
+  invisible(capture.output({
+    modelo <- kproto(clusterdb[, -1], k = k)
+  }))
+  cost[k] <- modelo$tot.withinss
+}
+
+plot(1:10, cost, type = "b", pch = 19,
+     xlab = "Número de clusters k",
+     ylab = "Disimilitud intra-cluster total",
+     main = "Método del Codo para k-prototypes")
+```
+
+Gracias al gráfico anterior, podemos determinar que el número optimo de k son 3; en la siguiente gráfica podemos observar como es que se distribuyen y el numero de observaciones en cada grupo
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+invisible(capture.output({
+  numclus <- kproto(clusterdb[, -1], k = 3)
+}))
+
+resultados <- clusterdb %>%
+  select(ID) %>%
+  mutate(cluster = numclus$cluster)
+
+CSiniestros <- CSiniestros %>%
+  left_join(resultados, by = "ID")
+```
+
+
+```{r, warning=FALSE, fig.align='center', message=FALSE, echo=FALSE, fig.height= 3, fig.width= 6}
+clusterdb$Cluster <- as.factor(numclus$cluster)
+
+ggplot(clusterdb, aes(x = Cluster, y = MONTO.PAGADO, fill = Cluster)) +
+  geom_boxplot() +
+  labs(title = "Distribución del Monto Pagado por Cluster (k = 3)",
+       x = "Cluster", y = "Monto Pagado") +
+  theme_minimal()
+```
+
+El algoritmo k-prototypes obtuvo la relación entre el monto pagado y el país en dónde ocurrió el siniestro, agrupandolos en los siguientes valores:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+tabla_clusters <- CSiniestros %>%
+  count(cluster) %>%
+  rename(`Cluster` = cluster, `Número de Observaciones` = n)
+
+kable(tabla_clusters, caption = "Distribución de Observaciones por Cluster")
+
+```
+
+
+Puntos importantes a señalar es que los clusters se dividieron principalmente por monto pagado, es decir,el primer grupo compone los outliers más significativos de los siniestros, mientras que el segundo contiene a los montos pagados en su mayoría y el tercero muestra a todos aquellos que son los montos pagados más bajos.
+
+Analizando la gráfica podemos observar que existen diferencias entre ellos, además de que el primer grupo muestra montos superiores junto con diferencias en la mediana y en el primer y tercer cuartil.
+
+El modelo propuesto se hizo mediante el uso de quantile forest debido a un mejor ajuste en los datos, sin embargo, se presenta tambien un ajuste mediante regresión cuantilica, de manera gráfica. 
+
+```{r, fig.pos='!htbp',echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (siniestros, cluster 1)(MSE = 0.07,0.05 y 0.06 en cuantiles = 10,50 y 90)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/q1.png")
+```
+
+```{r, fig.pos='!htbp',echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (siniestros, cluster 2)(MSE = 0.30,0.30 y 0.31 en cuantiles = 25,50 y 95)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/Q2.png")
+```
+
+```{r,fig.pos='!htbp', echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (siniestros, cluster 3)(MSE = 0.07,0.05 y 0.06 en cuantiles = 25,50 y 95)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/Q3.png")
+```
+
+```{r, fig.pos='!htbp',echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (emisiones, cluster 1)(MSE = 0.35,0.25 y 0.32 en cuantiles = 25,50 y 75)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/1cluster.png")
+```
+
+```{r, fig.pos='!htbp',echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (emisiones, cluster 2)(MSE = 0.42,0.33 y 0.41 en cuantiles = 25,50 y 75)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/2cluster.png")
+```
+
+```{r, fig.pos='!htbp',echo=FALSE, message=FALSE, warning=FALSE, fig.align="center", out.width="60%", fig.cap="Regresión cuantílica (emisiones, cluster 3)(MSE = 0.25,0.20 y 0.25 en cuantiles = 25,50 y 75)"}
+knitr::include_graphics("C:/Users/vazqu/OneDrive/Documents/TRABAJOFINALMODELOSYSIMULACIONN/3cluster.png")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ahora bien, en cuanto a las emsiones respecta, es importante mencionar que en los siguientes gráficos se toma en consideración el ratio y la suma asegurada, de igual manera presentando tres escenarios diferentes de cuantiles. 
+
+
+# Discusión
+
+
+En términos generales, la aplicación del algoritmo k-prototype resultó ser una estrategia eficaz para mejorar la calidad de las estimaciones, al permitir la segmentación de conglomerados con características similares. Esta agrupación facilitó la calibración más precisa de los modelos de regresión cuantilica dentro de cada clúster. En el caso particular de las emisiones, se optó por emplear un modelo quantile forest, lo cual representó una mejora sustancial en la capacidad predictiva del modelo, especialmente en los percentiles extremos. No obstante, es importante destacar que, para optimizar el desempeño de las estimaciones, se excluyeron observaciones con ratios atípicamente elevados, dado que estos podrían distorsionar los resultados y comprometer la robustez del modelo.
+
+# Resultados
+
+En el caso de las emisiomes, el modelo quantile forest permitió una estimación adecuada de los distintos cuantiles dentro de cada conglomerado identificado por el algoritmo de clustering. No obstante, una oportunidad clara de mejora radica en la optimización de los hiperparámetros, la cual no fue abordada en profundidad en este estudio. Es probable que un ajuste más riguroso de estos parámetros contribuya a obtener resultados aún más precisos. Para la evaluación del desempeño del modelo, se utilizó el Error Absoluto Medio (MAE) como métrica principal, lo que permitió validar la calidad de las predicciones cuantílicas obtenidas. Este enfoque resulta particularmente útil para las aseguradoras, ya que ofrece una herramienta más precisa para estimar la relación entre Prima Emitida y Prima Devengada. Además, se reconoce que, como línea futura de trabajo, podría explorarse la implementación de modelos log-lineales, con el fin de capturar posibles relaciones no lineales entre las variables involucradas.
+
+Para los resultados presentados en la base de siniestros los resultados presentados indican que el algoritmo de K-prototypes fué una buena alternativa para clasificar los siniestros, además, en las gráficas mostradas en la parte final, las lineas moradas representan la distribución de los datos de acuerdo al percentil, cabe señalar que algunas se ven en situaciones de caída ya que a medida que el monto pagado es superior, el ratio tiende a disminuir debido a factores como coaseguros o deducibles, pues los siniestros altos suelne tener protecciones diferentes para las aseguradoras; el Error Absoluto Medio en los modelos obtenidos es un buen indicador de la precisión de los mismos; al igual que la base de emisiones, se consideró el trabajar con transformaciones, consideraciones que pueden seguir a futuro.
+
+## Bibliografía
+
+1. Chang, V., & Tsai, J. (2014). Quantile Regression of Corporate Analysis of Corporate Liquidty: Evidence from the U.S. Property–Liability Insurance Industry. *Geneva Papers on Risk and Insurance - Issues and Practice, 39*(1), 77–89. [https://doi.org/10.1057/gpp.2012.46](https://doi.org/10.1057/gpp.2012.46)
+
+2. Engle, R., & Manganelli, S. (2004). CAViaR: Conditional Autoregressive Value at Risk by Regression Quantiles. Journal of Business & Economic Statistics, 22(4), 367-381.
+
+3. Jolliffe, I. (2002). Principal Component Analysis. Springer.
+
+4. Koenker, R., & Bassett, G. (1978). Regression Quantiles. Econometrica, 46(1), 33-50.
+
+5. Koenker, R. (2005). Quantile Regression. Cambridge University Press.
+
+6. López, A., & Ramírez, J. (2019). Customer segmentation in banking using K-Means clustering. Journal of Financial Analytics, 15(2), 75-89.
+
+7. MacQueen, J. (1967). Some Methods for Classification and Analysis of Multivariate Observations. Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability, 1(281-297).
+
+8. Martins, F., & Silva, H. (2020). Quantile regression applications in insurance risk assessment. Risk and Insurance Journal, 27(3), 201-220.
+
+9. Pérez, L., & Gómez, R. (2021). Principal Component Analysis in Financial Risk Management: A Study on Cooperatives. Financial Studies Review, 10(4), 45-62.
+
+10. Rodríguez, P., Fernández, M., & Torres, C. (2018). Estimación del valor en riesgo en mercados emergentes utilizando modelos CAViaR. Revista Económica de Colombia, 34(2), 112-130).
+
+11. Zhang, X., Li, W., & Chen, Y. (2020). Risk assessment using clustering techniques in portfolio management. Finance and Investment Journal, 29(1), 99-115).
+
+12. Yuan, X., Li, Y., & Zhang, Z. (2023). Quantile regression applications in actuarial science: A review. Journal of Actuarial Science, 18(2), 45-67.
